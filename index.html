@@ -13,11 +13,43 @@
 <div id="map"></div>
 <script>
   function initMap() {
-    let delta = {lat: 35.02986, lng: 135.77177};
-    let map = new google.maps.Map(
-        document.getElementById('map'), {zoom: 17, center: delta}
-    );
-    let marker = new google.maps.Marker({position: delta, map: map});
+    let start = {lat: 35.68141, lng: 139.76716};
+    let end = {lat: 34.98602, lng: 135.75879};
+    let center = {lat: (start.lat + end.lat) / 2, lng: (start.lng + end.lng) / 2};
+
+    let map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 8,
+      center: center
+    });
+
+    let marker = new google.maps.Marker({
+      position: start,
+      map: map
+    });
+
+    animateMarker(marker, start, end, 2000);
+  }
+
+  function animateMarker(marker, start, end, duration) {
+    let startTime = new Date().getTime();
+    let interpolate = function(src, dst, t) {
+      return (dst - src) * t + src;
+    };
+
+    let animationStep = function() {
+      let now = new Date().getTime();
+      let time = (now - startTime) / duration;
+      if (time < 1) {
+        requestAnimationFrame(animationStep);
+        let lat = interpolate(start.lat, end.lat, time);
+        let lng = interpolate(start.lng, end.lng, time);
+        marker.setPosition(new google.maps.LatLng(lat, lng));
+      } else {
+        marker.setPosition(end);
+      }
+    };
+
+    requestAnimationFrame(animationStep);
   }
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=API_KEY_PLACEHOLDER&callback=initMap"></script>
